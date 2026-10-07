@@ -1265,7 +1265,7 @@ function tabTarget() {
       dAbove + ' of ' + dTotal + ' days at or above plan' + (coverageNote ? ' · ' + coverageNote : '')) + '</div>');
 
   let h = sec('Cumulative position · ' + rangeLabel(A.from, A.to), '',
-    '<div class="grid g5">' +
+    '<div class="grid g3">' +
     block('Dabble (website only)', A.dabbleTgt, A.dabbleGmv, A.dabbleAch, A.dabbleVar, s.dabbleAbove, s.dabbleDays.length) +
     block('Amazon (marketplace)', A.amzTgtPlan, A.amzTgtAct, A.amzTgtAch, A.amzTgtVar, s.amzAbove, s.amzDays.length) +
     block('FirstCry (marketplace)', A.fcTgtPlan, A.fcTgtAct, A.fcTgtAch, A.fcTgtVar, s.fcAbove, s.fcDays.length) +
@@ -2087,12 +2087,17 @@ function afterMarket() {
     options: { scales: { x: gridX, y: gridY(v => v.toFixed(0) + 'x') },
       plugins: { tooltip: { callbacks: { label: c => xs(c.raw, 1) } } } }
   });
+  // When ad spend is ₹0 on every day (as in this workbook), Chart.js's auto-scaled axis
+  // for a flat all-zero series picks a tiny non-zero max and spaces ticks within it — money()
+  // then rounds several of those sub-rupee ticks to the same "₹1", which reads as a data
+  // error. An explicit floor on the max keeps the axis (and its ticks) sane either way.
+  const blkSpendMax = Math.max(100, ...R.map(r => r.blinkitSpend || 0));
   chart('t6_blk', {
     type: 'bar',
     data: { labels: labels(R), datasets: [
       { label: 'Blinkit GMV', data: R.map(r => r.blinkitGMV), backgroundColor: '#A63A72', borderRadius: 3, yAxisID: 'y' },
       { label: 'Blinkit ad spend', type: 'line', data: R.map(r => r.blinkitSpend), borderColor: '#16233A', yAxisID: 'y1', pointRadius: 2 }] },
-    options: { scales: { x: gridX, y: axMoney(), y1: Object.assign(axMoney(), { position: 'right', grid: { display: false } }) },
+    options: { scales: { x: gridX, y: axMoney(), y1: Object.assign(axMoney(), { position: 'right', grid: { display: false }, max: blkSpendMax }) },
       plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 9, boxHeight: 9, padding: 10 } },
         tooltip: { callbacks: { label: c => c.raw == null ? c.dataset.label + ': not updated' : c.dataset.label + ': ' + inr(c.raw) } } } }
   });
@@ -2538,5 +2543,5 @@ render();
 </script>
 </body>
 </html>
-index-october007.html
-Displaying index-october007.html. 
+index-october7.html
+Displaying index-october7.html.
